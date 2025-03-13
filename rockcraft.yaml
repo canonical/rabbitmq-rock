@@ -1,0 +1,76 @@
+name: rabbitmq
+summary: RabbitMQ is an open source multi-protocol messaging broker.
+description: |
+  RabbitMQ is a reliable and mature messaging and streaming broker, which is easy to deploy on cloud environments, on-premises, and on your local machine. It is currently used by millions worldwide. This is a chiselled RabbitMQ image.
+version: "3.12.1"
+license: Apache-2.0
+base: bare
+build-base: ubuntu@24.04
+platforms:
+  amd64:
+
+parts:
+  rabbitmq:
+    plugin: nil
+    source: https://github.com/zhijie-yang/chisel-releases.git
+    source-branch: ROCKS-1822/rework-rabbitmq-24.04
+    source-depth: 1
+    source-type: git
+    override-build: |
+      chisel cut --release ./ --root ${CRAFT_PART_INSTALL} rabbitmq-server_bins dash_bins base-files_chisel
+      groupadd --root ${CRAFT_PART_INSTALL} --gid 999 --system rabbitmq
+      mkdir -p ${CRAFT_PART_INSTALL}/var/lib/rabbitmq/mnesia ${CRAFT_PART_INSTALL}/var/log/rabbitmq \
+               ${CRAFT_PART_INSTALL}/etc/rabbitmq/conf.d
+      useradd \
+        --gid 999 \
+        --uid 999 \
+        --no-create-home \
+        --root ${CRAFT_PART_INSTALL} \
+        --home-dir /var/lib/rabbitmq \
+        --system \
+        -s /bin/bash \
+        rabbitmq
+      chroot ${CRAFT_PART_INSTALL} chown -R rabbitmq:rabbitmq /var/lib/rabbitmq /var/log/rabbitmq /etc/rabbitmq
+
+  configs:
+    plugin: nil
+    after: [rabbitmq]
+    source: ./configs
+    override-build: |
+      cp -r etc/ ${CRAFT_PART_INSTALL}
+      chown -R 999:999 ${CRAFT_PART_INSTALL}/etc/rabbitmq
+
+  scripts:
+    plugin: dump
+    source: ./scripts
+    organize:
+      config-defaults.sh: /scripts/config-defaults.sh
+
+services:
+  rabbitmq-server:
+    # Using `rabbitmq-server` directly will case the stdout and stderr redirected to file
+    # by the script. Here we use the same executable as written in the rabbitmq-server.services
+    # for the systemd.
+    command: /usr/lib/rabbitmq/bin/rabbitmq-server
+      # environment:
+      # RABBITMQ_DEFAULT_USER: guest
+      # RABBITMQ_DEFAULT_PASS: guest
+    override: replace
+    startup: enabled
+    user: rabbitmq
+    group: rabbitmq
+    requires:
+      - epmd
+    environment:
+      TZ: UTC
+
+  # epmd is wanted by rabbitmq. See /usr/lib/systemd/system/rabbitmq-server.service for details
+  epmd:
+    override: replace
+    startup: disabled
+    summary: Erlang EPM service
+    command: epmd
+    user: rabbitmq
+    group: rabbitmq
+    environment:
+      TZ: UTC
