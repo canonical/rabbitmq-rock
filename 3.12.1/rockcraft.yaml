@@ -1,7 +1,10 @@
 name: rabbitmq
 summary: RabbitMQ is an open source multi-protocol messaging broker.
 description: |
-  RabbitMQ is a reliable and mature messaging and streaming broker, which is easy to deploy on cloud environments, on-premises, and on your local machine. It is currently used by millions worldwide. This is a chiselled RabbitMQ image.
+  RabbitMQ is a reliable and mature messaging and streaming broker, which is
+  easy to deploy on cloud environments, on-premises, and on your local machine.
+  It is currently used by millions worldwide. This is a chiselled RabbitMQ
+  image.
 version: "3.12.1"
 license: Apache-2.0
 base: bare
@@ -17,20 +20,44 @@ parts:
     source-depth: 1
     source-type: git
     override-build: |
-      chisel cut --release ./ --root ${CRAFT_PART_INSTALL} rabbitmq-server_bins dash_bins base-files_chisel
-      groupadd --root ${CRAFT_PART_INSTALL} --gid 999 --system rabbitmq
-      mkdir -p ${CRAFT_PART_INSTALL}/var/lib/rabbitmq/mnesia ${CRAFT_PART_INSTALL}/var/log/rabbitmq \
-               ${CRAFT_PART_INSTALL}/etc/rabbitmq/conf.d
+      chisel cut --release ./ \
+                 --root ${CRAFT_PART_INSTALL} \
+                 rabbitmq-server_bins \
+                 base-files_chisel \
+                 dash_bins \
+                 erlang-base_bins \
+                 erlang-crypto_modules \
+                 erlang-eldap_modules \
+                 erlang-inets_scripts \
+                 erlang-mnesia_modules \
+                 erlang-os-mon_bins \
+                 erlang-parsetools_modules \
+                 erlang-public-key_modules \
+                 erlang-runtime-tools_modules \
+                 erlang-ssl_modules \
+                 erlang-syntax-tools_modules \
+                 erlang-tools_modules \
+                 erlang-xmerl_modules
+
+  set-user:
+    plugin: nil
+    after: [rabbitmq]
+    override-stage: |
+      groupadd --root ${CRAFT_STAGE} --gid 999 --system rabbitmq
+      mkdir -p ${CRAFT_STAGE}/var/lib/rabbitmq/mnesia ${CRAFT_STAGE}/var/log/rabbitmq \
+               ${CRAFT_STAGE}/etc/rabbitmq/conf.d
       useradd \
         --gid 999 \
         --uid 999 \
         --no-create-home \
-        --root ${CRAFT_PART_INSTALL} \
+        --root ${CRAFT_STAGE} \
         --home-dir /var/lib/rabbitmq \
         --system \
         -s /bin/bash \
         rabbitmq
-      chroot ${CRAFT_PART_INSTALL} chown -R rabbitmq:rabbitmq /var/lib/rabbitmq /var/log/rabbitmq /etc/rabbitmq
+      chown -R 999:999 ${CRAFT_STAGE}/var/lib/rabbitmq ${CRAFT_STAGE}/var/log/rabbitmq\
+                       ${CRAFT_STAGE}/etc/rabbitmq
+
 
   configs:
     plugin: nil
@@ -44,17 +71,14 @@ parts:
     plugin: dump
     source: ./scripts
     organize:
-      config-defaults.sh: /scripts/config-defaults.sh
+      config-defaults.sh: scripts/config-defaults.sh
 
 services:
   rabbitmq-server:
-    # Using `rabbitmq-server` directly will case the stdout and stderr redirected to file
-    # by the script. Here we use the same executable as written in the rabbitmq-server.services
-    # for the systemd.
+    # Using `rabbitmq-server` directly will cause the stdout and stderr to be
+    # redirected to a file by the script. Here, we use the same executable as
+    # written in the rabbitmq-server.services for systemd.
     command: /usr/lib/rabbitmq/bin/rabbitmq-server
-      # environment:
-      # RABBITMQ_DEFAULT_USER: guest
-      # RABBITMQ_DEFAULT_PASS: guest
     override: replace
     startup: enabled
     user: rabbitmq
@@ -67,7 +91,6 @@ services:
   # epmd is wanted by rabbitmq. See /usr/lib/systemd/system/rabbitmq-server.service for details
   epmd:
     override: replace
-    startup: disabled
     summary: Erlang EPM service
     command: epmd
     user: rabbitmq
