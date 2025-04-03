@@ -5,39 +5,34 @@ description: |
   easy to deploy on cloud environments, on-premises, and on your local machine.
   It is currently used by millions worldwide. This is a chiselled RabbitMQ
   image.
-version: "3.12.1"
+version: "3.12"
 license: Apache-2.0
 base: bare
 build-base: ubuntu@24.04
 platforms:
   amd64:
+  arm64:
 
 parts:
   rabbitmq:
     plugin: nil
-    source: https://github.com/zhijie-yang/chisel-releases.git
-    source-branch: ROCKS-1822/rework-rabbitmq-24.04
-    source-depth: 1
-    source-type: git
-    override-build: |
-      chisel cut --release ./ \
-                 --root ${CRAFT_PART_INSTALL} \
-                 rabbitmq-server_bins \
-                 base-files_chisel \
-                 dash_bins \
-                 erlang-base_bins \
-                 erlang-crypto_modules \
-                 erlang-eldap_modules \
-                 erlang-inets_scripts \
-                 erlang-mnesia_modules \
-                 erlang-os-mon_bins \
-                 erlang-parsetools_modules \
-                 erlang-public-key_modules \
-                 erlang-runtime-tools_modules \
-                 erlang-ssl_modules \
-                 erlang-syntax-tools_modules \
-                 erlang-tools_modules \
-                 erlang-xmerl_modules
+    stage-packages:
+      - rabbitmq-server_bins
+      - base-files_chisel
+      - dash_bins
+      - erlang-base_bins
+      - erlang-crypto_modules
+      - erlang-eldap_modules
+      - erlang-inets_scripts
+      - erlang-mnesia_modules
+      - erlang-os-mon_bins
+      - erlang-parsetools_modules
+      - erlang-public-key_modules
+      - erlang-runtime-tools_modules
+      - erlang-ssl_modules
+      - erlang-syntax-tools_modules
+      - erlang-tools_modules
+      - erlang-xmerl_modules
 
   set-user:
     plugin: nil
