@@ -12,6 +12,7 @@ build-base: ubuntu@24.04
 platforms:
   amd64:
   arm64:
+run-user: _daemon_
 
 parts:
   rabbitmq:
@@ -38,19 +39,18 @@ parts:
     plugin: nil
     after: [rabbitmq]
     override-stage: |
-      groupadd --root ${CRAFT_STAGE} --gid 999 --system rabbitmq
+      # groupadd --root ${CRAFT_STAGE} --gid 10999 rabbitmq
       mkdir -p ${CRAFT_STAGE}/var/lib/rabbitmq/mnesia ${CRAFT_STAGE}/var/log/rabbitmq \
                ${CRAFT_STAGE}/etc/rabbitmq/conf.d
-      useradd \
-        --gid 999 \
-        --uid 999 \
-        --no-create-home \
-        --root ${CRAFT_STAGE} \
-        --home-dir /var/lib/rabbitmq \
-        --system \
-        -s /bin/bash \
-        rabbitmq
-      chown -R 999:999 ${CRAFT_STAGE}/var/lib/rabbitmq ${CRAFT_STAGE}/var/log/rabbitmq\
+      # useradd \
+      #    --gid 10999 \
+      #    --uid 10999 \
+      #    --no-create-home \
+      #    --root ${CRAFT_STAGE} \
+      #    --home-dir /var/lib/rabbitmq \
+      #    -s /bin/bash \
+      #    rabbitmq
+      chown -R 584792:584792 ${CRAFT_STAGE}/var/lib/rabbitmq ${CRAFT_STAGE}/var/log/rabbitmq\
                        ${CRAFT_STAGE}/etc/rabbitmq
 
 
@@ -60,7 +60,7 @@ parts:
     source: ./configs
     override-build: |
       cp -r etc/ ${CRAFT_PART_INSTALL}
-      chown -R 999:999 ${CRAFT_PART_INSTALL}/etc/rabbitmq
+      chown -R 584792:584792 ${CRAFT_PART_INSTALL}/etc/rabbitmq
 
   scripts:
     plugin: dump
@@ -76,8 +76,8 @@ services:
     command: /usr/lib/rabbitmq/bin/rabbitmq-server
     override: replace
     startup: enabled
-    user: rabbitmq
-    group: rabbitmq
+    user: _daemon_
+    group: _daemon_
     requires:
       - epmd
     environment:
@@ -88,7 +88,7 @@ services:
     override: replace
     summary: Erlang EPM service
     command: epmd
-    user: rabbitmq
-    group: rabbitmq
+    user: _daemon_
+    group: _daemon_
     environment:
       TZ: UTC

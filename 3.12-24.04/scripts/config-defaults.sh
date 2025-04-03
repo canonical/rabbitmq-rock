@@ -50,4 +50,4 @@ management_agent.disable_metrics_collector = true
 write_file_if_not_exists "$DEFAULTS_CONF" "$DEFAULTS_CONTENT"
 write_file_if_not_exists "$METRICS_CONF" "$METRICS_CONTENT"
 
-chown -R rabbitmq /etc/rabbitmq/conf.d
+chown -R _daemon_:_daemon_ /etc/rabbitmq/conf.d
