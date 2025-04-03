@@ -39,17 +39,8 @@ parts:
     plugin: nil
     after: [rabbitmq]
     override-stage: |
-      # groupadd --root ${CRAFT_STAGE} --gid 10999 rabbitmq
       mkdir -p ${CRAFT_STAGE}/var/lib/rabbitmq/mnesia ${CRAFT_STAGE}/var/log/rabbitmq \
                ${CRAFT_STAGE}/etc/rabbitmq/conf.d
-      # useradd \
-      #    --gid 10999 \
-      #    --uid 10999 \
-      #    --no-create-home \
-      #    --root ${CRAFT_STAGE} \
-      #    --home-dir /var/lib/rabbitmq \
-      #    -s /bin/bash \
-      #    rabbitmq
       chown -R 584792:584792 ${CRAFT_STAGE}/var/lib/rabbitmq ${CRAFT_STAGE}/var/log/rabbitmq\
                        ${CRAFT_STAGE}/etc/rabbitmq
 
