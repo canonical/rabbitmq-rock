@@ -34,6 +34,11 @@ jobs:
             echo "ERR: can only build 1 image at a time, but trying to trigger ${img_path}"
             exit 1
           fi
+          if [ -z "${img_path}" ]
+          then
+            img_path="3.12-24.04"
+          fi
+
           test -d "${img_path}"
 
           echo "img-version=$(echo "${img_path}" | cut -d '/' -f 1)" >> "$GITHUB_OUTPUT"
