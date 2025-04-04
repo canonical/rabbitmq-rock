@@ -29,7 +29,7 @@ jobs:
           occurrences="${img_path//[^,]}"
           if [ ${#occurrences} -ne 0 ]
           then
-            echo "ERR: can only build 1 image at a time, but trying to trigger ${img_path}"
+            echo "error: can only build 1 image at a time, but trying to trigger ${img_path}"
             exit 1
           fi
           if [ -z "${img_path}" ]
