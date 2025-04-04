@@ -39,10 +39,13 @@ parts:
     plugin: nil
     after: [rabbitmq]
     override-stage: |
-      mkdir -p ${CRAFT_STAGE}/var/lib/rabbitmq/mnesia ${CRAFT_STAGE}/var/log/rabbitmq \
+      mkdir -p ${CRAFT_STAGE}/var/lib/rabbitmq/mnesia \
+               ${CRAFT_STAGE}/var/log/rabbitmq \
                ${CRAFT_STAGE}/etc/rabbitmq/conf.d
-      chown -R 584792:584792 ${CRAFT_STAGE}/var/lib/rabbitmq ${CRAFT_STAGE}/var/log/rabbitmq\
-                       ${CRAFT_STAGE}/etc/rabbitmq
+      chown -R 584792:584792 \
+               ${CRAFT_STAGE}/var/lib/rabbitmq \
+               ${CRAFT_STAGE}/var/log/rabbitmq\
+               ${CRAFT_STAGE}/etc/rabbitmq
 
 
   configs:
