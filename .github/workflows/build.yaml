@@ -1,0 +1,79 @@
+name: OCI Factory Workflows - Build kubectl Rock
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  prepare-build:
+    runs-on: ubuntu-latest
+    outputs:
+      img-version: ${{ steps.validate-image.outputs.img-version }}
+      rockfile-directory: ${{ steps.validate-image.outputs.rockfile-directory }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Changed files
+        uses: tj-actions/changed-files@531f5f7d163941f0c1c04e0ff4d8bb243ac4366f
+        id: changed-files
+        with:
+          separator: ","
+          dir_names: "true"
+          files: |
+            */rockcraft.y*ml
+
+      - name: Validate image from dispatch
+        id: validate-image
+        run: |
+          set -ex
+          img_path="${{ steps.changed-files.outputs.all_changed_files }}"
+          occurrences="${img_path//[^,]}"
+          if [ ${#occurrences} -ne 0 ]
+          then
+            echo "ERR: can only build 1 image at a time, but trying to trigger ${img_path}"
+            exit 1
+          fi
+          test -d "${img_path}"
+
+          echo "img-version=$(echo "${img_path}" | cut -d '/' -f 1)" >> "$GITHUB_OUTPUT"
+          echo "rockfile-directory=$(echo "${img_path}" | rev | cut -d '/' -f 2- | rev)" >> "$GITHUB_OUTPUT"
+
+
+  build:
+    needs: [prepare-build]
+    uses: canonical/oci-factory/.github/workflows/Build-Rock.yaml@main
+    with:
+      oci-archive-name: "rabbitmq-rock"
+      rock-repo: "canonical/rabbitmq-rock"
+      rock-repo-commit: main
+      rockfile-directory: "${{ needs.prepare-build.outputs.rockfile-directory }}"
+      arch-map: '{"amd64": ["ubuntu-latest"], "arm64": ["ubuntu-24.04-arm"]}'
+
+  test:
+    needs: [build]
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: rabbitmq-rock
+
+      - name: 'Set up test environment'
+        run: pip install -r tests/requirements.txt
+
+      - name: 'Set up skopeo'
+        uses: warjiang/setup-skopeo@main
+        with:
+          version: latest
+
+      - run: skopeo copy oci-archive:rabbitmq-rock docker-daemon:test-img:latest
+
+      - name: 'Smoking test'
+        run: |
+          set -e
+          docker run -d --name rabbitmq-server -p 5672:5672 test-img:latest
+          docker exec rabbitmq-server /scripts/config-defaults.sh
+          docker exec rabbitmq-server pebble restart rabbitmq-server
+          sleep 10
+          python3 tests/integration/test_messaging.py
+
