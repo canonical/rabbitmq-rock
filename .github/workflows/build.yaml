@@ -2,8 +2,6 @@ name: OCI Factory Workflows - Build kubectl Rock
 
 on:
   push:
-    branches:
-      - main
 
 jobs:
   prepare-build:
@@ -51,7 +49,7 @@ jobs:
     with:
       oci-archive-name: "rabbitmq-rock"
       rock-repo: "canonical/rabbitmq-rock"
-      rock-repo-commit: main
+      rock-repo-commit: "${{ github.sha }}"
       rockfile-directory: "${{ needs.prepare-build.outputs.rockfile-directory }}"
       arch-map: '{"amd64": ["ubuntu-latest"], "arm64": ["ubuntu-24.04-arm"]}'
 
