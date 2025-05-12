@@ -20,6 +20,7 @@ parts:
     stage-packages:
       - rabbitmq-server_bins
       - base-files_chisel
+      - base-files_release-info
       - dash_bins
       - erlang-base_bins
       - erlang-crypto_modules
