@@ -17,29 +17,24 @@ run-user: _daemon_
 parts:
   rabbitmq:
     plugin: nil
-    source: https://github.com/zhijie-yang/chisel-releases.git
-    source-type: git
-    source-branch: ROCKS-2344/back-port-rabbitmq
-    override-build: |
-      chisel cut --release ./ \
-        --root ${CRAFT_PART_INSTALL} \
-        rabbitmq-server_bins \
-        base-files_chisel \
-        base-files_release-info \
-        dash_bins \
-        erlang-base_bins \
-        erlang-crypto_modules \
-        erlang-eldap_modules \
-        erlang-inets_scripts \
-        erlang-mnesia_modules \
-        erlang-os-mon_bins \
-        erlang-parsetools_modules \
-        erlang-public-key_modules \
-        erlang-runtime-tools_modules \
-        erlang-ssl_modules \
-        erlang-syntax-tools_modules \
-        erlang-tools_modules \
-        erlang-xmerl_modules
+    stage-packages:
+      - rabbitmq-server_bins
+      - base-files_chisel
+      - base-files_release-info
+      - dash_bins
+      - erlang-base_bins
+      - erlang-crypto_modules
+      - erlang-eldap_modules
+      - erlang-inets_scripts
+      - erlang-mnesia_modules
+      - erlang-os-mon_bins
+      - erlang-parsetools_modules
+      - erlang-public-key_modules
+      - erlang-runtime-tools_modules
+      - erlang-ssl_modules
+      - erlang-syntax-tools_modules
+      - erlang-tools_modules
+      - erlang-xmerl_modules
 
   set-user:
     plugin: nil
