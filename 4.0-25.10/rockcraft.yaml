@@ -25,6 +25,7 @@ parts:
       - erlang-base_bins
       - erlang-crypto_modules
       - erlang-eldap_modules
+      - erlang-inets_modules
       - erlang-inets_scripts
       - erlang-mnesia_modules
       - erlang-os-mon_bins
