@@ -62,7 +62,6 @@ jobs:
       rock-repo: "canonical/rabbitmq-rock"
       rock-repo-commit: "${{ github.sha }}"
       rockfile-directory: "${{ matrix.rockfile-directory }}"
-      arch-map: '{"amd64": ["ubuntu-latest"], "arm64": ["ubuntu-24.04-arm"]}'
 
 
   test:
