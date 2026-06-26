@@ -7,8 +7,7 @@ jobs:
   prepare-build:
     runs-on: ubuntu-latest
     outputs:
-      img-version: ${{ steps.validate-image.outputs.img-version }}
-      rockfile-directory: ${{ steps.validate-image.outputs.rockfile-directory }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
 
@@ -21,47 +20,63 @@ jobs:
           files: |
             */rockcraft.y*ml
 
-      - name: Validate image from dispatch
-        id: validate-image
+      - name: Set matrix
+        id: set-matrix
         run: |
           set -ex
-          img_path="${{ steps.changed-files.outputs.all_changed_files }}"
-          occurrences="${img_path//[^,]}"
-          if [ ${#occurrences} -ne 0 ]
-          then
-            echo "error: can only build 1 image at a time, but trying to trigger ${img_path}"
-            exit 1
-          fi
-          if [ -z "${img_path}" ]
-          then
-            img_path="3.12-24.04"
+          changed="${{ steps.changed-files.outputs.all_changed_files }}"
+
+          if [ -z "${changed}" ]; then
+            # No rockcraft files changed; discover all version directories via glob
+            changed="$(echo */rockcraft.y*ml | tr ' ' '\n' | cut -d '/' -f 1 | paste -sd ',')"
           fi
 
-          test -d "${img_path}"
+          matrix="["
+          first=true
+          IFS=',' read -ra dirs <<< "${changed}"
+          for dir in "${dirs[@]}"; do
+            # Normalise to the top-level version directory
+            version="$(echo "${dir}" | cut -d '/' -f 1)"
+            test -d "${version}"
+            entry="{\"version\":\"${version}\",\"rockfile-directory\":\"${version}\"}"
+            if [ "${first}" = "true" ]; then
+              matrix="${matrix}${entry}"
+              first=false
+            else
+              matrix="${matrix},${entry}"
+            fi
+          done
+          matrix="${matrix}]"
 
-          echo "img-version=$(echo "${img_path}" | cut -d '/' -f 1)" >> "$GITHUB_OUTPUT"
-          echo "rockfile-directory=$(echo "${img_path}" | rev | cut -d '/' -f 2- | rev)" >> "$GITHUB_OUTPUT"
+          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
 
 
   build:
     needs: [prepare-build]
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.prepare-build.outputs.matrix) }}
     uses: canonical/oci-factory/.github/workflows/Build-Rock.yaml@main
     with:
-      oci-archive-name: "rabbitmq-rock"
+      oci-archive-name: "rabbitmq-rock-${{ matrix.version }}"
       rock-repo: "canonical/rabbitmq-rock"
       rock-repo-commit: "${{ github.sha }}"
-      rockfile-directory: "${{ needs.prepare-build.outputs.rockfile-directory }}"
+      rockfile-directory: "${{ matrix.rockfile-directory }}"
       arch-map: '{"amd64": ["ubuntu-latest"], "arm64": ["ubuntu-24.04-arm"]}'
 
+
   test:
-    needs: [build]
+    needs: [build, prepare-build]
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.prepare-build.outputs.matrix) }}
     runs-on: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/download-artifact@v4
         with:
-          name: rabbitmq-rock
+          name: rabbitmq-rock-${{ matrix.version }}
 
       - name: 'Set up test environment'
         run: pip install -r tests/requirements.txt
@@ -71,14 +86,13 @@ jobs:
         with:
           version: latest
 
-      - run: skopeo copy oci-archive:rabbitmq-rock docker-daemon:test-img:latest
+      - run: skopeo copy oci-archive:rabbitmq-rock-${{ matrix.version }} docker-daemon:test-img:${{ matrix.version }}
 
       - name: 'Smoking test'
         run: |
           set -e
-          docker run -d --name rabbitmq-server -p 5672:5672 test-img:latest
+          docker run -d --name rabbitmq-server -p 5672:5672 test-img:${{ matrix.version }}
           docker exec rabbitmq-server /scripts/config-defaults.sh
           docker exec rabbitmq-server pebble restart rabbitmq-server
           sleep 10
           python3 tests/integration/test_messaging.py
-
