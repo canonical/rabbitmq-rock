@@ -12,6 +12,8 @@ build-base: ubuntu@22.04
 platforms:
   amd64:
   arm64:
+  ppc64le:
+  s390x:
 run-user: _daemon_
 
 parts:
