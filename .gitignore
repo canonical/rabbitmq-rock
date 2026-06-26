@@ -1,2 +1,15 @@
-venv/
+# rock
 *.rock
+
+# OS Files
+.DS_store
+
+# Spread
+.craft-spread*/
+.spread-reuse*
+
+# IDE
+.vs_code/
+.vscode/
+.idea/
+
