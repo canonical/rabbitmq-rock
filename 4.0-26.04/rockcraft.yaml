@@ -12,7 +12,7 @@ build-base: ubuntu@26.04
 platforms:
   amd64:
   arm64:
-  ppc64le:
+  ppc64el:
   s390x:
 run-user: _daemon_
 
