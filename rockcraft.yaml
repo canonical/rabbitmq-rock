@@ -5,10 +5,10 @@ description: |
   easy to deploy on cloud environments, on-premises, and on your local machine.
   It is currently used by millions worldwide. This is a chiselled RabbitMQ
   image.
-version: "3.9"
+version: "4.0"
 license: Apache-2.0
 base: bare
-build-base: ubuntu@22.04
+build-base: devel
 platforms:
   amd64:
   arm64:
