@@ -1,4 +1,4 @@
-project: rabbitmq-rock
+project: rabbitmq:4.0-26.04
 
 backends:
   craft:
