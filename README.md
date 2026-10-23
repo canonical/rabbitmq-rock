@@ -9,6 +9,6 @@ repository.
 
 ## Available versions
 
-* [RabbitMQ 3.9 (Ubuntu 22.04)](./rabbitmq/3.9-22.04/rockcraft.yaml)
-* [RabbitMQ 3.12 (Ubuntu 24.04)](./rabbitmq/3.12-24.04/rockcraft.yaml)
-* [RabbitMQ 4.0 (Ubuntu 26.04)](./rabbitmq/4.0-26.04/rockcraft.yaml)
+* [RabbitMQ 3.9 (Ubuntu 22.04)](https://github.com/canonical/rabbitmq-rock/tree/3.9-22.04)
+* [RabbitMQ 3.12 (Ubuntu 24.04)](https://github.com/canonical/rabbitmq-rock/tree/3.12-24.04)
+* [RabbitMQ 4.0 (Ubuntu 26.04)](https://github.com/canonical/rabbitmq-rock/tree/4.0-26.04)
