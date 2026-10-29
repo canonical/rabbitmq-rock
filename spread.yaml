@@ -1,4 +1,4 @@
-project: rabbitmq:devel
+project: rabbitmq:4.3-26.10
 
 backends:
   craft:
@@ -23,10 +23,10 @@ suites:
       sudo apt remove --yes retry
 
       # Load the rock into docker
-      sudo rockcraft.skopeo --insecure-policy copy "oci-archive:$CRAFT_ARTIFACT" docker-daemon:rabbitmq:devel
+      sudo rockcraft.skopeo --insecure-policy copy "oci-archive:$CRAFT_ARTIFACT" docker-daemon:rabbitmq:4.3-26.10
 
     restore: |
-      docker image rm --force rabbitmq:devel
+      docker image rm --force rabbitmq:4.3-26.10
 
 exclude:
   - .git

@@ -1,6 +1,10 @@
 name: Rock pipeline
 
 on:
+  push:
+    branches: [4.3-26.10]
+  pull_request:
+    branches: [4.3-26.10]
   workflow_dispatch:
 
 jobs:
