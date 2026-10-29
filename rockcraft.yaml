@@ -8,7 +8,8 @@ description: |
 version: '4.3'
 license: Apache-2.0
 base: bare
-build-base: ubuntu@26.10
+# TODO: Update once 26.10 is stabilized
+build-base: devel
 platforms:
   amd64:
   arm64:
@@ -19,24 +20,48 @@ run-user: _daemon_
 parts:
   rabbitmq:
     plugin: nil
-    stage-packages:
-      - rabbitmq-server_bins
-      - base-files_chisel
-      - base-files_release-info
-      - dash_bins
-      - erlang-base_bins
-      - erlang-crypto_modules
-      - erlang-eldap_modules
-      - erlang-inets_scripts
-      - erlang-mnesia_modules
-      - erlang-os-mon_bins
-      - erlang-parsetools_modules
-      - erlang-public-key_modules
-      - erlang-runtime-tools_modules
-      - erlang-ssl_modules
-      - erlang-syntax-tools_modules
-      - erlang-tools_modules
-      - erlang-xmerl_modules
+
+    # TODO: Uncomment once 26.10 is stabilized
+    # stage-packages:
+    #   - rabbitmq-server_bins
+    #   - base-files_chisel
+    #   - base-files_release-info
+    #   - dash_bins
+    #   - erlang-base_bins
+    #   - erlang-crypto_modules
+    #   - erlang-eldap_modules
+    #   - erlang-inets_scripts
+    #   - erlang-mnesia_modules
+    #   - erlang-os-mon_bins
+    #   - erlang-parsetools_modules
+    #   - erlang-public-key_modules
+    #   - erlang-runtime-tools_modules
+    #   - erlang-ssl_modules
+    #   - erlang-syntax-tools_modules
+    #   - erlang-tools_modules
+    #   - erlang-xmerl_modules
+
+    # TODO: Remove once 26.10 is stabilized
+    override-build: |
+      craftctl default
+      chisel cut --release ubuntu-26.10 --root ${CRAFT_PART_INSTALL} \
+        rabbitmq-server_bins \
+        base-files_release-info \
+        dash_bins \
+        erlang-base_bins \
+        erlang-crypto_modules \
+        erlang-eldap_modules \
+        erlang-inets_scripts \
+        erlang-mnesia_modules \
+        erlang-os-mon_bins \
+        erlang-parsetools_modules \
+        erlang-public-key_modules \
+        erlang-runtime-tools_modules \
+        erlang-ssl_modules \
+        erlang-syntax-tools_modules \
+        erlang-tools_modules \
+        erlang-xmerl_modules
+
 
   set-user:
     plugin: nil
