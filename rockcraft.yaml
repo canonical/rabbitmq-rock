@@ -23,14 +23,13 @@ parts:
 
     # TODO: Uncomment once 26.10 is stabilized
     # stage-packages:
-    #   - rabbitmq-server_bins
+    #   - rabbitmq-server_scripts
     #   - base-files_chisel
     #   - base-files_release-info
     #   - dash_bins
     #   - erlang-base_bins
     #   - erlang-crypto_modules
     #   - erlang-eldap_modules
-    #   - erlang-inets_scripts
     #   - erlang-mnesia_modules
     #   - erlang-os-mon_bins
     #   - erlang-parsetools_modules
@@ -45,13 +44,12 @@ parts:
     override-build: |
       craftctl default
       chisel cut --release ubuntu-26.10 --root ${CRAFT_PART_INSTALL} \
-        rabbitmq-server_bins \
+        rabbitmq-server_scripts \
         base-files_release-info \
         dash_bins \
         erlang-base_bins \
         erlang-crypto_modules \
         erlang-eldap_modules \
-        erlang-inets_scripts \
         erlang-mnesia_modules \
         erlang-os-mon_bins \
         erlang-parsetools_modules \
